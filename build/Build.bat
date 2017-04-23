@@ -53,6 +53,17 @@ ECHO.
 ECHO Making sure we have a web.config
 IF NOT EXIST %CD%\..\src\Umbraco.Web.UI\web.config COPY %CD%\..\src\Umbraco.Web.UI\web.Template.config %CD%\..\src\Umbraco.Web.UI\web.config
 
+for /f "usebackq tokens=1* delims=: " %%i in (`tools\vswhere.exe -latest -requires Microsoft.Component.MSBuild`) do (
+  if /i "%%i"=="installationPath" set InstallDir=%%j
+)
+
+SET VSWherePath="%InstallDir%\MSBuild"
+ECHO.
+ECHO Visual Studio is installed in: %InstallDir%
+
+SET MSBUILDPATH=C:\Program Files (x86)\MSBuild\14.0\Bin
+SET MSBUILD="%MSBUILDPATH%\MsBuild.exe"
+
 ECHO.
 ECHO.
 ECHO Performing MSBuild and producing Umbraco binaries zip files
@@ -60,7 +71,7 @@ ECHO This takes a few minutes and logging is set to report warnings
 ECHO and errors only so it might seems like nothing is happening for a while. 
 ECHO You can check the msbuild.log file for progress.
 ECHO.
-%windir%\Microsoft.NET\Framework\v4.0.30319\msbuild.exe "Build.proj" /p:BUILD_RELEASE=%release% /p:BUILD_COMMENT=%comment% /p:NugetPackagesDirectory=%nuGetFolder% /consoleloggerparameters:Summary;ErrorsOnly;WarningsOnly /fileLogger
+%MSBUILD% "Build.proj" /p:BUILD_RELEASE=%release% /p:BUILD_COMMENT=%comment% /p:NugetPackagesDirectory=%nuGetFolder% /p:VSWherePath=%VSWherePath%
 IF ERRORLEVEL 1 GOTO :error
 
 ECHO.
